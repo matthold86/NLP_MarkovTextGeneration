@@ -55,10 +55,10 @@ def finish_sentence(sentence: list, n: int, corpus: list, randomize=False):
         '1': {'testgramdict': unigram_dict}
     }
 
-    next_word = find_sequence(current_history, n, vocab, corpus_length, randomize)
-    if len(next_word) > 1:
+    potential_word = find_sequence(current_history, n, vocab, corpus_length, randomize)
+    if len(potential_word) > 1:
         current_best_index = None
-        for word in next_word:
+        for word in potential_word:
             sequence = list(current_history[str(n)]['input'])+[word]
             print(sequence)
             for i in range(len(corpus) - (n-1)):
@@ -72,10 +72,13 @@ def finish_sentence(sentence: list, n: int, corpus: list, randomize=False):
                         next_word = word 
                     else:
                         continue
-
+        sentence.append(next_word)
+    else:
+        next_word = potential_word[0]
+        sentence.append(next_word)
     print(f'The next best word is {next_word}')
-    sentence.append(next_word)
     if (len(sentence)==10) | (sentence[-1]== "."):
+        print(sentence)
         return sentence
     else:
         finish_sentence(sentence=sentence, n=3, corpus=corpus, randomize=False)
@@ -107,16 +110,21 @@ def find_sequence(current_history: dict, n:int, vocab, corpus_length, randomize)
                 continue
 
         for word in vocab:
+            print(type(word))
             if n > 1:
                 print(f'evaluating word: {word}')
-                test_gram = tuple(list(current_history[str(n)]['input']) + [word])
-                lower_gram = tuple(current_history[str(n)]['input'])
+                if type(current_history[str(n)]['input']) == tuple:
+                    test_gram = tuple(list(current_history[str(n)]['input']) + [word])
+                elif type(current_history[str(n)]['input']) == str:
+                    test_gram = tuple([current_history[str(n)]['input'], word])
+                print(f'TEST_GRAM {test_gram}')
+                lower_gram = current_history[str(n)]['input']
                 test_gram_count = current_history[str(n)]['testgramdict'].get(test_gram, 0)
                 lower_gram_count = current_history[str(n)]['lowergramdict'].get(lower_gram, 0)
                 word_scores[word] = test_gram_count / lower_gram_count
             elif n == 1:
                 word_scores[word] = current_history[str(n)][word]['count'] / corpus_length
-
+        print(word_scores)
         if any(value > 0 for value in word_scores.values()):
             print('next word has been identified')
             highest_score = max(word_scores.values())
@@ -154,5 +162,5 @@ if __name__ == "__main__":
     split_tokens = [token for token in split_tokens if token]
     lower_corpus = [w.lower() for w in split_tokens]
     #define_ngram(lower_corpus)
-    sentence = finish_sentence([".", "theres", "something"], 3, lower_corpus, False)
+    sentence = finish_sentence(["babe", "theres", "agree"], 3, lower_corpus, False)
     print(sentence)
