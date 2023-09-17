@@ -41,7 +41,7 @@ def define_ngram(corpus: list):
             unigram_dict[unigram] = 1
             vocab.append(unigram)
 
-    print(unigram_dict)
+    #print(unigram_dict)
 
     return trigram_dict, bigram_dict, unigram_dict, vocab
 
@@ -60,7 +60,7 @@ def finish_sentence(sentence: list, n: int, corpus: list, randomize=False):
         current_best_index = None
         for word in potential_word:
             sequence = list(current_history[str(n)]['input'])+[word]
-            print(sequence)
+            #print(sequence)
             for i in range(len(corpus) - (n-1)):
                 test_seq = corpus[i:i+n]
                 if (test_seq == sequence) & (current_best_index == None):
@@ -76,55 +76,47 @@ def finish_sentence(sentence: list, n: int, corpus: list, randomize=False):
     else:
         next_word = potential_word[0]
         sentence.append(next_word)
-    print(f'The next best word is {next_word}')
+    print(f"The next best word is '{next_word}'")
     if (len(sentence)==10) | (sentence[-1]== "."):
         print(sentence)
         return sentence
     else:
-        finish_sentence(sentence=sentence, n=3, corpus=corpus, randomize=False)
+        return finish_sentence(sentence=sentence, n=n, corpus=corpus, randomize=False)
                     
-    #for word in vocab:
-    #    test_trigram = (input[0], input[1], word)
-    #    test_bigram = (input[0], input[1])
-    #    if bigram_count == 0:
-    #        print("go to unigram")
-    #    trigram_count = trigram_dict.get(test_trigram, 0)
-    #    bigram_count = bigram_dict.get(test_bigram, 0)
-    #    score = trigram_count / bigram_count
-    #    word_probabilities[word] = score
-
-
+#
 def find_sequence(current_history: dict, n:int, vocab, corpus_length, randomize):
-    while n > 0:
-        print(n)
+    while n > 0:#
+        #print(n)
         if n == 0:
             return "Fuck why is n 0"
         word_scores = {}
         if n > 1:
             lower_gram = current_history[str(n)]['input']
-            print(lower_gram)
-            print(current_history[str(n)]['lowergramdict'].get(lower_gram, 0))
+            #print(lower_gram)
+            #print(current_history[str(n)]['lowergramdict'].get(lower_gram, 0))
             if current_history[str(n)]['lowergramdict'].get(lower_gram, 0) == 0:
                 print("Need Lower N-Gram Up Here")
                 n-=1
                 continue
 
         for word in vocab:
-            print(type(word))
+            #print(type(word))
             if n > 1:
-                print(f'evaluating word: {word}')
+                #print(f'evaluating word: {word}')
                 if type(current_history[str(n)]['input']) == tuple:
                     test_gram = tuple(list(current_history[str(n)]['input']) + [word])
                 elif type(current_history[str(n)]['input']) == str:
                     test_gram = tuple([current_history[str(n)]['input'], word])
-                print(f'TEST_GRAM {test_gram}')
+                #print(f'TEST_GRAM {test_gram}')
                 lower_gram = current_history[str(n)]['input']
                 test_gram_count = current_history[str(n)]['testgramdict'].get(test_gram, 0)
                 lower_gram_count = current_history[str(n)]['lowergramdict'].get(lower_gram, 0)
                 word_scores[word] = test_gram_count / lower_gram_count
             elif n == 1:
-                word_scores[word] = current_history[str(n)][word]['count'] / corpus_length
-        print(word_scores)
+                word_scores[word] = current_history[str(n)]['testgramdict'][word] / corpus_length
+        
+        #print(word_scores)
+        #input()
         if any(value > 0 for value in word_scores.values()):
             print('next word has been identified')
             highest_score = max(word_scores.values())
@@ -133,23 +125,10 @@ def find_sequence(current_history: dict, n:int, vocab, corpus_length, randomize)
                 if value == highest_score:
                     best_words.append(key)
             return best_words
-                #first_word = best_words[0]
-                #for word in best_words:
-                #    current_best_index = current_history[str(n)]['testgramdict'][first_word]['index']
-                #    new_index = current_history[str(n)]['testgramdict'][word]['index']
-                #    if new_index < current_best_index:
-                #        first_word = word
+
         else:
             n-=1
             print("Need Lower N-Gram Down Here")
-        n-=1
-        #print(test_gram)
-        #print(lower_gram)
-        #print(test_gram_count)
-        #print(lower_gram_count)
-
-    
-            
 
 
 if __name__ == "__main__":
