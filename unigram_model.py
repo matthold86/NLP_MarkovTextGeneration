@@ -12,7 +12,7 @@ tokens = [char for char in text]
 
 # encode as {0, 1}
 vocabulary = [chr(i + ord("a")) for i in range(26)] + [" ", None]
-
+print(vocabulary)
 
 def onehot(vocabulary: List[Optional[str]], token: Optional[str]) -> List[int]:
     """Generate the one-hot encoding for the provided token in the provided vocabulary."""

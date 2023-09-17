@@ -13,6 +13,8 @@ from mtg import finish_sentence
 
 def test_generator():
     """Test Markov text generator."""
+    nltk.download('gutenberg')
+    nltk.download('punkt')
     corpus = nltk.word_tokenize(
         nltk.corpus.gutenberg.raw("austen-sense.txt").lower()
     )
