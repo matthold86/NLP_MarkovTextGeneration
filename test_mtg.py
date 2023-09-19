@@ -25,8 +25,8 @@ def test_generator():
     #    randomize=False,
     #)
     words = finish_sentence(
-        ["she", "was", "not"],
-        1,
+        ["robot"],
+        3,
         corpus,
         randomize=False,
     )
@@ -52,7 +52,8 @@ def test_generator():
     #    "two",
     #]
 
-    assert words == ['she', 'was', 'not', ',', ',', ',', ',', ',', ',', ',']
+    #assert words == ['she', 'was', 'not', ',', ',', ',', ',', ',', ',', ',']
+    assert words == ['robot', ',', 'and', 'the', 'two', 'miss', 'steeles', ',', 'as', 'she']
 
 
 if __name__ == "__main__":
