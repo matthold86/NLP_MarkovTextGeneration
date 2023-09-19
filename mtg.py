@@ -47,44 +47,47 @@ def find_sequence(sentence:list, n:int, vocab:list, corpus_length, corpus, rando
     while n > 0:
         word_scores = {}
         if n > 1:
-            lowergramdict = train_model(corpus, n-1) ## Denominator in n-gram equation
+            input_text = ",".join(sentence[-(n-1):]) ## join n-gram into single string of text with delimitor: ","
+            lowergramdict = train_model(corpus, n-1) ## Denominator dictionary in n-gram equation
             if lowergramdict.get(input_text, 0) == 0: ## Stupid Backoff if input_text is not found in corpus.
                 print("Need Lower N-Gram Up Here")
                 n-=1
                 continue
-            lower_gram_count = lowergramdict.get(input_text, 0) ## Denominator for n-gram probabilities
-            input_text = ",".join(sentence[-(n-1):]) ## join n-gram into single string of text with delimitor: ","
+            lower_gram_count = lowergramdict.get(input_text, 0) ## Denominator for given input_text
             testgramdict = train_model(corpus, n) ## Create dictionary of n-grams of length n (numerator)
         elif n == 1:
             input_text = ""
             testgramdict = train_model(corpus, n) ## If using unigram, only need one n-gram dictionary
 
         for word in vocab: ## calculate probability of each n-gram
-            if n > 1:
+            if n > 1: ## Use sentence history for probability
                 test_gram = input_text + "," + word
                 test_gram_count = testgramdict.get(test_gram, 0)
                 word_scores[word] = test_gram_count / lower_gram_count
-            elif n == 1:
-                word_scores[word] = testgramdict[word] / corpus_length ## Unigram Percentages: C(word) / C(total corpus)
+            elif n == 1: ## Use (word count) / (total corpus count) for unigram
+                word_scores[word] = testgramdict[word] / corpus_length
 
         if randomize == False: ## Deterministic Route
-            if any(value > 0 for value in word_scores.values()): ## If any word has probability > 0
+            if any(value > 0 for value in word_scores.values()): ## If any word has probability > 0, find word in word_scores.
                 print('next word has been identified')
                 highest_score = max(word_scores.values())
                 best_words = []
                 for key, value in word_scores.items():
                     if value == highest_score:
                         best_words.append(key)
-            else: ## If no words
+            else: ## If all words in vocab have 0% probability, backoff
                 n-=1
                 print("Need Lower N-Gram Down Here")
                 continue
-            if len(best_words) > 1:
+
+            if len(best_words) > 1: ## if more than one word identified with highest probability
                 next_word = best_word_tie(best_words, input_text, corpus, n)
-            elif len(best_words) == 1:
+            elif len(best_words) == 1: ## if only one word identified with highest probability
                 next_word = best_words[0]
+
             return next_word
-        else:
+        
+        else: # Randomized sampling route
             num = np.random.random()
             tot = 0
             for key, value in word_scores.items():
@@ -93,12 +96,13 @@ def find_sequence(sentence:list, n:int, vocab:list, corpus_length, corpus, rando
                     return key
 
 def best_word_tie(best_words, input_text, corpus, n):
+    '''Iterate through corpus and find earliest occurance of n-grams using words in best_words'''
     current_best_index = None
     for word in best_words:
         if input_text == "":
             sequence = word
         else:
-            sequence = input_text + "," + word
+            sequence = input_text + "," + word ## Create n-gram with potential next word
         for i in range(len(corpus) - (n-1)):
             test_seq = ",".join(corpus[i:i+n])
             if (test_seq == sequence):
